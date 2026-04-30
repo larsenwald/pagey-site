@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Soju Snake</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #1a0a12;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #gameCanvas {
+    display: block;
+    touch-action: none;
+    cursor: pointer;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 10, 18, 0.88);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    transition: opacity 0.35s ease;
+    font-family: system-ui, sans-serif;
+    color: #f2b8cc;
+    text-align: center;
+    padding: 1.5rem;
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .ov-emoji { font-size: 2.2rem; }
+  .ov-title { font-size: 1.2rem; font-style: normal; font-weight: 600; color: #f2b8cc; line-height: 1.3; }
+  .ov-sub   { font-size: 0.82rem; letter-spacing: 0.03em; text-transform: none; color: #e8789a; opacity: 0.9; line-height: 1.7; max-width: 280px; }
+  .ov-score { font-size: 1rem; color: #f0c878; min-height: 1.4em; }
+
+  .ov-btn {
+    background: #8b1a4a;
+    color: #fde8f0;
+    border: 1px solid #e8789a;
+    border-radius: 3px;
+    padding: 0.6rem 2rem;
+    font-family: system-ui, sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .ov-btn:hover { background: #c2446e; }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<div class="overlay" id="overlay">
+  <div class="ov-emoji" id="ovEmoji">🍶</div>
+  <div class="ov-title" id="ovTitle">Ron built you a Soju Snake Game</div>
+  <div class="ov-sub"   id="ovSub">I know how much you enjoy soju, so I coded Snake in HTML/CSS/JS and made it soju themed. Happy birthday queen &lt;3<br><br>Arrow keys or swipe to play.</div>
+  <div class="ov-score" id="ovScore"></div>
+  <button class="ov-btn" id="ovBtn">Begin</button>
+</div>
+
+<script>
+const canvas  = document.getElementById('gameCanvas');
+const ctx     = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+
+let COLS, ROWS, CS;
+let snake, dir, queue, food, score, best, bottles, running, dead, timer, spd;
+best = 0;
+
+function resize() {
+  const W = window.innerWidth, H = window.innerHeight;
+  CS = Math.max(14, Math.min(26, Math.floor(Math.min(W, H) / 20)));
+  COLS = Math.floor(W / CS);
+  ROWS = Math.floor(H / CS);
+  canvas.width  = COLS * CS;
+  canvas.height = ROWS * CS;
+}
+
+function init() {
+  resize();
+  const sx = Math.floor(COLS/2), sy = Math.floor(ROWS/2);
+  snake  = [{x:sx,y:sy},{x:sx-1,y:sy},{x:sx-2,y:sy}];
+  dir    = {x:1,y:0};
+  queue  = [];
+  score  = 0; bottles = 0; spd = 130;
+  dead   = false; running = true;
+  placeFood();
+}
+
+function placeFood() {
+  let p, t=0;
+  do { p={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)}; t++; }
+  while (snake.some(s=>s.x===p.x&&s.y===p.y) && t<300);
+  food = p;
+}
+
+function loop() {
+  clearTimeout(timer);
+  if (!running) return;
+  timer = setTimeout(()=>{ tick(); draw(); loop(); }, spd);
+}
+
+function tick() {
+  if (queue.length) dir = queue.shift();
+  const h = {x:snake[0].x+dir.x, y:snake[0].y+dir.y};
+  if (h.x<0||h.x>=COLS||h.y<0||h.y>=ROWS) { die(); return; }
+  for (let i=3;i<snake.length;i++) if(snake[i].x===h.x&&snake[i].y===h.y){die();return;}
+  snake.unshift(h);
+  if (h.x===food.x&&h.y===food.y) {
+    score += 10 + Math.floor(snake.length/3);
+    bottles++;
+    if (score>best) best=score;
+    if (bottles%5===0) spd=Math.max(55,spd-12);
+    placeFood();
+  } else {
+    snake.pop();
+  }
+}
+
+function die() {
+  running=false; dead=true;
+  clearTimeout(timer);
+  document.getElementById('ovEmoji').textContent = '💔';
+  document.getElementById('ovTitle').textContent = 'The night is over';
+  document.getElementById('ovSub').textContent   = 'You slithered into the void';
+  document.getElementById('ovScore').textContent = `${score} pts · ${bottles} 🍶 consumed`;
+  document.getElementById('ovBtn').textContent   = 'One more round';
+  overlay.classList.remove('hidden');
+}
+
+function draw() {
+  ctx.fillStyle='#1a0a12';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // Grid
+  ctx.strokeStyle='rgba(194,68,110,0.07)'; ctx.lineWidth=0.5;
+  for(let x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(x*CS,0);ctx.lineTo(x*CS,canvas.height);ctx.stroke();}
+  for(let y=0;y<=ROWS;y++){ctx.beginPath();ctx.moveTo(0,y*CS);ctx.lineTo(canvas.width,y*CS);ctx.stroke();}
+
+  // Food
+  const fpx=food.x*CS, fpy=food.y*CS;
+  const fcx=fpx+CS/2, fcy=fpy+CS/2;
+  const pulse=1+0.08*Math.sin(Date.now()/800);
+  ctx.save();
+  ctx.translate(fcx,fcy); ctx.scale(pulse,pulse);
+  const aura=ctx.createRadialGradient(0,0,0,0,0,CS*0.9);
+  aura.addColorStop(0,'rgba(212,160,74,0.35)'); aura.addColorStop(1,'transparent');
+  ctx.fillStyle=aura; ctx.beginPath(); ctx.arc(0,0,CS*0.9,0,Math.PI*2); ctx.fill();
+  drawBottle(CS);
+  ctx.restore();
+
+  // Snake
+  const len=snake.length;
+  for(let i=len-1;i>=0;i--){
+    const s=snake[i], t=i/len;
+    const px=s.x*CS, py=s.y*CS, pad=1.5;
+    if(i===0){
+      const g=ctx.createRadialGradient(px+CS/2,py+CS/2,0,px+CS/2,py+CS/2,CS*0.7);
+      g.addColorStop(0,'#f2a0c0');g.addColorStop(0.5,'#d4547a');g.addColorStop(1,'#a83060');
+      ctx.fillStyle=g;
+      ctx.shadowColor='rgba(232,120,154,0.8)';ctx.shadowBlur=14;
+      rr(px+pad,py+pad,CS-pad*2,CS-pad*2,4);ctx.fill();
+      ctx.shadowBlur=0;
+      drawEyes(px,py);
+    } else {
+      const r=Math.round(168-t*60),g2=Math.round(48-t*20),b=Math.round(96-t*30);
+      ctx.fillStyle=`rgb(${r},${g2},${b})`;
+      ctx.shadowColor='rgba(139,26,74,0.3)';ctx.shadowBlur=4;
+      rr(px+pad,py+pad,CS-pad*2,CS-pad*2,3);ctx.fill();
+      ctx.shadowBlur=0;
+    }
+  }
+}
+
+function drawEyes(px,py){
+  let e1,e2;
+  if(dir.x===1)       {e1={x:.7,y:.25};e2={x:.7,y:.7};}
+  else if(dir.x===-1) {e1={x:.3,y:.25};e2={x:.3,y:.7};}
+  else if(dir.y===-1) {e1={x:.25,y:.3};e2={x:.7,y:.3};}
+  else                {e1={x:.25,y:.7};e2={x:.7,y:.7};}
+  const er=Math.max(2,CS*.12), pr=Math.max(1,er*.55);
+  ctx.fillStyle='#fde8f0';
+  ctx.beginPath();ctx.arc(px+CS*e1.x,py+CS*e1.y,er,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(px+CS*e2.x,py+CS*e2.y,er,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#2a0818';
+  ctx.beginPath();ctx.arc(px+CS*e1.x,py+CS*e1.y,pr,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(px+CS*e2.x,py+CS*e2.y,pr,0,Math.PI*2);ctx.fill();
+}
+
+function drawBottle(cs){
+  const w=cs*.38,h=cs*.72,x=-w/2,y=-h/2;
+  const bg=ctx.createLinearGradient(x,0,x+w,0);
+  bg.addColorStop(0,'#7ecf9e');bg.addColorStop(.3,'#b8ead0');bg.addColorStop(.7,'#7ecf9e');bg.addColorStop(1,'#4a9e70');
+  ctx.fillStyle=bg;
+  ctx.beginPath();
+  ctx.moveTo(x+w*.15,y+h*.35);
+  ctx.bezierCurveTo(x,y+h*.35,x,y+h*.65,x+w*.1,y+h);
+  ctx.lineTo(x+w*.9,y+h);
+  ctx.bezierCurveTo(x+w,y+h*.65,x+w,y+h*.35,x+w*.85,y+h*.35);
+  ctx.closePath();ctx.fill();
+  const ng=ctx.createLinearGradient(x+w*.3,0,x+w*.7,0);
+  ng.addColorStop(0,'#5aaf80');ng.addColorStop(.5,'#a0dfc0');ng.addColorStop(1,'#5aaf80');
+  ctx.fillStyle=ng;ctx.fillRect(x+w*.3,y+h*.12,w*.4,h*.25);
+  ctx.fillStyle='#d4a04a';ctx.beginPath();ctx.roundRect(x+w*.28,y,w*.44,h*.14,2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.25)';ctx.beginPath();ctx.ellipse(x+w*.3,y+h*.6,w*.08,h*.18,-.3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(242,184,204,0.6)';ctx.beginPath();ctx.roundRect(x+w*.12,y+h*.48,w*.76,h*.28,2);ctx.fill();
+  ctx.fillStyle='rgba(139,26,74,0.8)';
+  ctx.fillRect(x+w*.2,y+h*.57,w*.6,h*.025);ctx.fillRect(x+w*.2,y+h*.615,w*.45,h*.018);
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.beginPath();ctx.arc(x+w*.5,y+h*.05,w*.07,0,Math.PI*2);ctx.fill();
+}
+
+function rr(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+// ── Input ─────────────────────────────────────────────────────────
+const OPP={UP:'DOWN',DOWN:'UP',LEFT:'RIGHT',RIGHT:'LEFT'};
+const DM={UP:{x:0,y:-1},DOWN:{x:0,y:1},LEFT:{x:-1,y:0},RIGHT:{x:1,y:0}};
+function dn(d){return Object.keys(DM).find(k=>DM[k].x===d.x&&DM[k].y===d.y)||'RIGHT';}
+function push(k){
+  const last=queue.length?queue[queue.length-1]:dir;
+  const ln=dn(last);
+  if(k===OPP[ln]||k===ln) return;
+  if(queue.length<2) queue.push(DM[k]);
+}
+
+document.addEventListener('keydown',e=>{
+  const m={ArrowUp:'UP',ArrowDown:'DOWN',ArrowLeft:'LEFT',ArrowRight:'RIGHT',w:'UP',s:'DOWN',a:'LEFT',d:'RIGHT',W:'UP',S:'DOWN',A:'LEFT',D:'RIGHT'};
+  if(m[e.key]){e.preventDefault();if(running)push(m[e.key]);}
+});
+
+// Swipe — all passive:false to block parent scroll
+let tx=0,ty=0;
+canvas.addEventListener('touchstart',e=>{e.preventDefault();tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:false});
+canvas.addEventListener('touchmove', e=>{e.preventDefault();},{passive:false});
+canvas.addEventListener('touchend',  e=>{
+  e.preventDefault();
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)<8&&Math.abs(dy)<8) return;
+  if(Math.abs(dx)>Math.abs(dy)) push(dx>0?'RIGHT':'LEFT');
+  else push(dy>0?'DOWN':'UP');
+},{passive:false});
+
+document.getElementById('ovBtn').addEventListener('click',()=>{
+  overlay.classList.add('hidden');
+  init(); loop();
+});
+
+let rt;
+window.addEventListener('resize',()=>{
+  clearTimeout(rt);
+  rt=setTimeout(()=>{ if(running){clearTimeout(timer);init();loop();}else{resize();draw();} },200);
+});
+
+// Boot
+resize(); draw();
+(function idle(){if(!running)draw();requestAnimationFrame(idle);})();
+</script>
+</body>
+</html>
