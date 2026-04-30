@@ -1119,11 +1119,13 @@ function showPasswordScreen() {
   screen.classList.add('active');
   spawnDots();
   document.getElementById('pw-input').focus();
+  document.body.style.overflow = 'hidden'; // lock before setupScrollLock runs
 }
 
 function hidePasswordScreen() {
   const screen = document.getElementById('password-screen');
   screen.classList.add('leaving');
+  document.body.style.overflow = ''; // release — setupScrollLock takes over after
   setTimeout(() => {
     screen.style.display = 'none';
     startExperience();
@@ -1280,14 +1282,21 @@ function triggerBloom(i) {
 }
 
 // ─── SCROLL LOCK ────────────────────────────────────────────
+// Counter-based so multiple callers can lock independently
+let scrollLockCount = 0;
+
 function lockScroll() {
-  state.scrollLocked = true;
+  scrollLockCount++;
   document.body.style.overflow = 'hidden';
+  state.scrollLocked = true;
 }
 
 function unlockScroll() {
-  state.scrollLocked = false;
-  document.body.style.overflow = '';
+  scrollLockCount = Math.max(0, scrollLockCount - 1);
+  if (scrollLockCount === 0) {
+    document.body.style.overflow = '';
+    state.scrollLocked = false;
+  }
 }
 
 function isInsideModal(el) {
@@ -1296,11 +1305,11 @@ function isInsideModal(el) {
 
 function setupScrollLock() {
   window.addEventListener('wheel', e => {
-    if (state.scrollLocked && !isInsideModal(e.target)) e.preventDefault();
+    if (scrollLockCount > 0 && !isInsideModal(e.target)) e.preventDefault();
   }, { passive: false });
 
   window.addEventListener('touchmove', e => {
-    if (state.scrollLocked && !isInsideModal(e.target)) e.preventDefault();
+    if (scrollLockCount > 0 && !isInsideModal(e.target)) e.preventDefault();
   }, { passive: false });
 }
 
@@ -1309,11 +1318,10 @@ function setupBloomPrompts() {
   for (let i = 0; i < 3; i++) {
     const btn = document.getElementById(`bloom-btn-${i+1}`);
     btn.addEventListener('click', () => {
-      // hide prompt
       document.getElementById(`bloom-prompt-${i+1}`).classList.remove('visible');
-      // show poem modal
       const modal = document.getElementById(`poem-modal-${i+1}`);
       modal.classList.add('visible');
+      lockScroll();
     });
 
     const closeBtn = document.getElementById(`poem-close-${i+1}`);
@@ -1327,6 +1335,7 @@ function setupBloomPrompts() {
       if (i === 2) {
         setTimeout(() => {
           document.getElementById('thankyou-modal').classList.add('visible');
+          lockScroll();
         }, 600);
       }
     });
@@ -1405,9 +1414,11 @@ function setupGumball() {
           <button class="refill-btn" id="refill-btn">Refill the machine ✨</button>
         `;
         modal.classList.add('visible');
+        lockScroll();
         document.getElementById('refill-btn').addEventListener('click', () => {
           state.gumballIndex = 0;
           modal.classList.remove('visible');
+          unlockScroll();
           document.getElementById('gumball-prompt').textContent = 'Tap the machine for a little message ✨';
         });
         return;
@@ -1419,6 +1430,7 @@ function setupGumball() {
         <div class="gumball-message-text">"${item.message}"</div>
       `;
       modal.classList.add('visible');
+      lockScroll();
     }, 600);
 
     // Animate handle
@@ -1430,6 +1442,7 @@ function setupGumball() {
 
   closeBtn.addEventListener('click', () => {
     modal.classList.remove('visible');
+    unlockScroll();
   });
 }
 
@@ -1437,6 +1450,7 @@ function setupGumball() {
 document.getElementById('thankyou-close').addEventListener('click', () => {
   document.getElementById('thankyou-modal').classList.remove('visible');
   state.thankyouShown = true;
+  unlockScroll();
 });
 
 // ─── KICK OFF ───────────────────────────────────────────────
