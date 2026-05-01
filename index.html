@@ -653,7 +653,200 @@
   .spacer    { height: 100vh; }
   .spacer-sm { height: 50vh; }
 
-  /* ── GRAIN ─────────────────────────────────────────────── */
+  /* ── NOT PAGEY LINK ────────────────────────────────────── */
+  .pw-not-pagey {
+    background: none; border: none;
+    color: var(--text-dim); font-family: 'Nunito', sans-serif;
+    font-size: 0.78rem; font-weight: 300;
+    letter-spacing: 0.05em; cursor: pointer;
+    margin-top: 0.5rem;
+    transition: color 0.2s;
+  }
+  .pw-not-pagey:hover { color: var(--pink); }
+
+  /* ── FIREFLY BOARD ─────────────────────────────────────── */
+  .firefly-board {
+    position: relative;
+    width: min(600px, 92vw);
+    height: 380px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(10,14,28,0.7);
+    border: 1px solid rgba(232,150,138,0.15);
+  }
+
+  #firefly-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    cursor: pointer;
+  }
+
+  .firefly-loading {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem; font-weight: 300;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+  .firefly-loading.hidden { display: none; }
+
+  .firefly-refresh {
+    margin-top: 1.2rem;
+    background: none; border: 1px solid rgba(232,150,138,0.3);
+    color: var(--text-mid); font-family: 'Nunito', sans-serif;
+    font-size: 0.72rem; font-weight: 400;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 0.5rem 1.4rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.25s;
+  }
+  .firefly-refresh:hover { border-color: var(--pink); color: var(--pink); }
+
+  /* firefly message tooltip */
+  .firefly-tooltip {
+    position: absolute;
+    background: rgba(26,16,40,0.97);
+    border: 1px solid rgba(232,150,138,0.3);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    max-width: 220px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+  .firefly-tooltip.visible { opacity: 1; }
+  .firefly-tooltip-name {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.65rem; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--pink); margin-bottom: 0.4rem;
+  }
+  .firefly-tooltip-msg {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem; font-weight: 300;
+    line-height: 1.6; color: var(--text-light);
+  }
+
+  /* ── CONTRIBUTOR MODAL ─────────────────────────────────── */
+  .contrib-overlay {
+    position: fixed; inset: 0; z-index: 9500;
+    background: rgba(8,12,22,0.92);
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .contrib-overlay.visible { opacity: 1; pointer-events: all; }
+
+  .contrib-modal {
+    background: var(--modal-bg);
+    border: 1px solid var(--modal-border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: min(520px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    transform: translateY(24px);
+    transition: transform 0.5s cubic-bezier(0.34,1.2,0.64,1);
+  }
+  .contrib-overlay.visible .contrib-modal { transform: translateY(0); }
+
+  .contrib-close {
+    position: absolute; top: 1rem; right: 1.2rem;
+    background: rgba(255,255,255,0.08); border: none;
+    color: var(--text-mid); font-size: 1.1rem;
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .contrib-close:hover { background: rgba(255,255,255,0.16); color: var(--text-light); }
+
+  .contrib-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 400;
+    color: var(--text-light); margin-bottom: 0.3rem;
+  }
+  .contrib-sub {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem; font-weight: 300;
+    color: var(--text-dim); margin-bottom: 1.5rem;
+  }
+
+  .contrib-form { display: flex; flex-direction: column; gap: 0.8rem; }
+
+  .contrib-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(232,150,138,0.2);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem; font-weight: 300;
+    padding: 0.7rem 1rem; outline: none;
+    transition: border-color 0.25s;
+    width: 100%;
+  }
+  .contrib-input:focus { border-color: var(--pink); }
+  .contrib-input::placeholder { color: var(--text-dim); }
+  .contrib-textarea { resize: vertical; min-height: 100px; }
+
+  .contrib-submit {
+    background: var(--pink); border: none;
+    color: var(--navy); font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem; font-weight: 500;
+    padding: 0.7rem 1.8rem; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s;
+    align-self: flex-start;
+  }
+  .contrib-submit:hover { background: var(--pink-light); }
+  .contrib-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .contrib-status {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem; font-weight: 300;
+    color: var(--pink); min-height: 1.2em;
+  }
+
+  .contrib-board-wrap { margin-top: 2rem; border-top: 1px solid rgba(232,150,138,0.12); padding-top: 1.5rem; }
+
+  .contrib-board-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.65rem; font-weight: 500;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--pink); margin-bottom: 1rem;
+  }
+
+  .contrib-messages { display: flex; flex-direction: column; gap: 0.8rem; max-height: 240px; overflow-y: auto; }
+
+  .contrib-msg-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(232,150,138,0.1);
+    border-radius: 8px; padding: 0.8rem 1rem;
+  }
+  .contrib-msg-name {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.65rem; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--pink); margin-bottom: 0.3rem;
+  }
+  .contrib-msg-text {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem; font-weight: 300;
+    line-height: 1.6; color: var(--text-light);
+  }
+
+  .contrib-board-refresh {
+    margin-top: 0.8rem;
+    background: none; border: 1px solid rgba(232,150,138,0.2);
+    color: var(--text-dim); font-family: 'Nunito', sans-serif;
+    font-size: 0.65rem; font-weight: 400;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 0.4rem 1rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.25s;
+  }
+  .contrib-board-refresh:hover { border-color: var(--pink); color: var(--pink); }
   .grain {
     position: fixed; inset: 0; z-index: 9998;
     pointer-events: none; opacity: 0.03;
@@ -726,6 +919,10 @@ const GUMBALL_MESSAGES = [
   { name: 'Paige',     message: "PAGEY! My pagey :') This is your day, and yours alone! Every moment with you has been a blessing, to spend time with you is to understand the true meaning of a friend. The Val to my Veya, as devilish as that means. Have a good day! I love you sososososo much!" },
 ];
 
+// ─── JSONBIN ────────────────────────────────────────────────
+const JSONBIN_BIN_ID  = '69f434d6aaba8821975ad101';
+const JSONBIN_API_KEY = '$2a$10$jmAVQdqVTiqBJxijIJypOOvod4H2LZPZKwJHaBFJJShYW934lkrRe';
+
 // ─── SNAKE GAME ─────────────────────────────────────────────
 // Path to your self-contained snake game HTML file
 const SNAKE_FILE = 'snake/snake.html';
@@ -782,6 +979,8 @@ const MAX_WRONG_ATTEMPTS = 7;
     The password is Pagey's favorite drink.<br>
     <em>If you still can't figure it out, just enter the wrong answer a few times — security around here isn't that tight, lol.</em>
   </div>
+
+  <button class="pw-not-pagey" id="pw-not-pagey">Not Pagey? Leave her a message →</button>
 </div>
 
 <!-- Main Experience -->
@@ -926,6 +1125,16 @@ const MAX_WRONG_ATTEMPTS = 7;
 
     </div><!-- end lily-scroll-track -->
 
+    <!-- Firefly message board -->
+    <div class="section" id="firefly-section">
+      <div class="section-label">messages from your people</div>
+      <div class="firefly-board" id="firefly-board">
+        <canvas id="firefly-canvas"></canvas>
+        <div class="firefly-loading" id="firefly-loading">loading messages…</div>
+      </div>
+      <button class="firefly-refresh" id="firefly-refresh">↻ refresh</button>
+    </div>
+
     <!-- Footer -->
     <footer id="site-footer">
       <div class="footer-text">
@@ -935,6 +1144,26 @@ const MAX_WRONG_ATTEMPTS = 7;
 
   </div><!-- end scroll-container -->
 </div><!-- end experience -->
+
+<!-- Contributor modal -->
+<div class="contrib-overlay" id="contrib-overlay">
+  <div class="contrib-modal">
+    <button class="contrib-close" id="contrib-close">×</button>
+    <div class="contrib-title">Leave Pagey a message 🌸</div>
+    <div class="contrib-sub">It'll show up on her birthday board.</div>
+    <div class="contrib-form">
+      <input class="contrib-input" id="contrib-name" type="text" placeholder="Your name" maxlength="40" />
+      <textarea class="contrib-input contrib-textarea" id="contrib-message" placeholder="Write something kind…" maxlength="400"></textarea>
+      <button class="contrib-submit" id="contrib-submit">Send it →</button>
+      <div class="contrib-status" id="contrib-status"></div>
+    </div>
+    <div class="contrib-board-wrap">
+      <div class="contrib-board-title">Messages so far</div>
+      <div class="contrib-messages" id="contrib-messages">Loading…</div>
+      <button class="contrib-board-refresh" id="contrib-board-refresh">↻ refresh</button>
+    </div>
+  </div>
+</div>
 
 <!-- ============================================================
      OVERLAYS
@@ -1194,6 +1423,7 @@ function startExperience() {
   setupGumball();
   setupBloomPrompts();
   setupScrollLock();
+  setupFireflyBoard();
   drawLilyFrame(1);
   requestAnimationFrame(lerpLoop);
 }
@@ -1441,6 +1671,202 @@ document.getElementById('thankyou-close').addEventListener('click', () => {
 // Prevent browser from restoring scroll position on reload
 if (history.scrollRestoration) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
+
+// ─── JSONBIN API ─────────────────────────────────────────────
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const JSONBIN_HEADERS = {
+  'Content-Type': 'application/json',
+  'X-Master-Key': JSONBIN_API_KEY,
+};
+
+async function fetchMessages() {
+  const res = await fetch(`${JSONBIN_URL}?meta=false`, { headers: JSONBIN_HEADERS });
+  const data = await res.json();
+  return data.messages || [];
+}
+
+async function addMessage(name, message) {
+  const current = await fetchMessages();
+  current.push({ name, message });
+  const res = await fetch(JSONBIN_URL, {
+    method: 'PUT',
+    headers: JSONBIN_HEADERS,
+    body: JSON.stringify({ messages: current }),
+  });
+  return res.ok;
+}
+
+// ─── CONTRIBUTOR MODAL ───────────────────────────────────────
+function setupContributorModal() {
+  const overlay   = document.getElementById('contrib-overlay');
+  const closeBtn  = document.getElementById('contrib-close');
+  const submitBtn = document.getElementById('contrib-submit');
+  const status    = document.getElementById('contrib-status');
+  const notPagey  = document.getElementById('pw-not-pagey');
+  const refreshBtn= document.getElementById('contrib-board-refresh');
+
+  notPagey.addEventListener('click', () => {
+    overlay.classList.add('visible');
+    loadContribMessages();
+  });
+
+  closeBtn.addEventListener('click', () => {
+    overlay.classList.remove('visible');
+  });
+
+  submitBtn.addEventListener('click', async () => {
+    const name = document.getElementById('contrib-name').value.trim();
+    const msg  = document.getElementById('contrib-message').value.trim();
+    if (!name || !msg) { status.textContent = 'Please fill in both fields.'; return; }
+    submitBtn.disabled = true;
+    status.textContent = 'Sending…';
+    const ok = await addMessage(name, msg);
+    if (ok) {
+      status.textContent = '💌 Message sent! It\'ll show up on Pagey\'s board.';
+      document.getElementById('contrib-name').value = '';
+      document.getElementById('contrib-message').value = '';
+      loadContribMessages();
+    } else {
+      status.textContent = 'Something went wrong. Try again?';
+    }
+    submitBtn.disabled = false;
+  });
+
+  refreshBtn.addEventListener('click', loadContribMessages);
+}
+
+async function loadContribMessages() {
+  const container = document.getElementById('contrib-messages');
+  container.textContent = 'Loading…';
+  try {
+    const messages = await fetchMessages();
+    if (!messages.length) { container.textContent = 'No messages yet. Be the first!'; return; }
+    container.innerHTML = '';
+    [...messages].reverse().forEach(m => {
+      const item = document.createElement('div');
+      item.className = 'contrib-msg-item';
+      item.innerHTML = `<div class="contrib-msg-name">${m.name}</div><div class="contrib-msg-text">${m.message}</div>`;
+      container.appendChild(item);
+    });
+  } catch(e) {
+    container.textContent = 'Couldn\'t load messages right now.';
+  }
+}
+
+// ─── FIREFLY BOARD ───────────────────────────────────────────
+function setupFireflyBoard() {
+  const board    = document.getElementById('firefly-board');
+  const canvas   = document.getElementById('firefly-canvas');
+  const ctx      = canvas.getContext('2d');
+  const loading  = document.getElementById('firefly-loading');
+  const refresh  = document.getElementById('firefly-refresh');
+
+  // tooltip
+  const tooltip = document.createElement('div');
+  tooltip.className = 'firefly-tooltip';
+  tooltip.innerHTML = '<div class="firefly-tooltip-name"></div><div class="firefly-tooltip-msg"></div>';
+  board.appendChild(tooltip);
+
+  let flies = [];
+  let animId;
+  let activeTooltip = null;
+
+  function resize() {
+    canvas.width  = board.offsetWidth;
+    canvas.height = board.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', () => { resize(); spawnFlies(flies.length); });
+
+  function spawnFlies(messages) {
+    flies = messages.map((m, i) => ({
+      x: 40 + Math.random() * (canvas.width  - 80),
+      y: 40 + Math.random() * (canvas.height - 80),
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: 4 + Math.random() * 3,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.015 + Math.random() * 0.02,
+      name: m.name,
+      message: m.message,
+    }));
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const t = Date.now();
+    flies.forEach(f => {
+      f.x += f.vx;
+      f.y += f.vy;
+      if (f.x < 20 || f.x > canvas.width  - 20) f.vx *= -1;
+      if (f.y < 20 || f.y > canvas.height - 20) f.vy *= -1;
+
+      const glow = 0.5 + 0.5 * Math.sin(t * f.speed + f.phase);
+      const alpha = 0.4 + 0.6 * glow;
+      const radius = f.r * (0.85 + 0.15 * glow);
+
+      // outer glow
+      const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, radius * 4);
+      grad.addColorStop(0, `rgba(232,150,138,${alpha * 0.5})`);
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, radius * 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // core
+      ctx.fillStyle = `rgba(242,184,176,${alpha})`;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    animId = requestAnimationFrame(draw);
+  }
+
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const hit = flies.find(f => Math.hypot(f.x - mx, f.y - my) < f.r * 5);
+    if (!hit) { tooltip.classList.remove('visible'); activeTooltip = null; return; }
+
+    // position tooltip
+    let tx = hit.x + 16, ty = hit.y - 20;
+    if (tx + 240 > canvas.width)  tx = hit.x - 240;
+    if (ty + 100 > canvas.height) ty = hit.y - 100;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top  = ty + 'px';
+    tooltip.querySelector('.firefly-tooltip-name').textContent = hit.name;
+    tooltip.querySelector('.firefly-tooltip-msg').textContent  = hit.message;
+    tooltip.classList.add('visible');
+    activeTooltip = hit;
+  });
+
+  async function load() {
+    loading.classList.remove('hidden');
+    cancelAnimationFrame(animId);
+    try {
+      const messages = await fetchMessages();
+      loading.classList.add('hidden');
+      if (!messages.length) { loading.textContent = 'No messages yet.'; loading.classList.remove('hidden'); return; }
+      spawnFlies(messages);
+      draw();
+    } catch(e) {
+      loading.textContent = 'Couldn\'t load messages.';
+    }
+  }
+
+  refresh.addEventListener('click', () => {
+    tooltip.classList.remove('visible');
+    load();
+  });
+
+  load();
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+setupContributorModal();
 initLoading();
 </script>
 </body>
