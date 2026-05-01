@@ -1831,15 +1831,30 @@ function setupFireflyBoard() {
     const hit = flies.find(f => Math.hypot(f.x - mx, f.y - my) < f.r * 5);
     if (!hit) { tooltip.classList.remove('visible'); activeTooltip = null; return; }
 
-    // position tooltip
-    let tx = hit.x + 16, ty = hit.y - 20;
-    if (tx + 240 > canvas.width)  tx = hit.x - 240;
-    if (ty + 100 > canvas.height) ty = hit.y - 100;
-    tooltip.style.left = tx + 'px';
-    tooltip.style.top  = ty + 'px';
+    // Show tooltip briefly to measure it
     tooltip.querySelector('.firefly-tooltip-name').textContent = hit.name;
     tooltip.querySelector('.firefly-tooltip-msg').textContent  = hit.message;
+    tooltip.style.left = '0px';
+    tooltip.style.top  = '0px';
     tooltip.classList.add('visible');
+
+    const tw = tooltip.offsetWidth  || 220;
+    const th = tooltip.offsetHeight || 80;
+    const pad = 10;
+
+    let tx = hit.x + 16;
+    let ty = hit.y - 20;
+
+    // Clamp horizontally
+    if (tx + tw + pad > canvas.width)  tx = hit.x - tw - 10;
+    if (tx < pad) tx = pad;
+
+    // Clamp vertically
+    if (ty + th + pad > canvas.height) ty = canvas.height - th - pad;
+    if (ty < pad) ty = pad;
+
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top  = ty + 'px';
     activeTooltip = hit;
   });
 
